@@ -10,13 +10,15 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/aristanetworks/ownership-voucher-grpc/ovgs";
 
 // The OVGS service defines a heirarchy of 'groups', which are identified by a
-// group_id (allocated by the server). Each group can have several  child groups;
+// group_id (allocated by the server). Each group can have several child groups;
 // Pinned Domain Certs are associated to a group, serial numbers can be assigned to a
 // group (which serves to limit the set of Users who can issue vouchers for those
 // serial numbers to Users who have the necessary permissions in that group)
 // Groups are created by users (except the root group, more on this later) and roles
 // are assigned to users (limiting the set of operations a user can invoke) per group.
 // Any permissions accorded by these roles on a group are heirarchical in nature.
+
+// Users are uniquely identified by the tuple username, user_type, org_id.
 
 // Note that the creation of a User is external to the ovgs service. Users may be
 // created by any mechanism that the service implementor may offer. It is assumed
@@ -116,7 +118,7 @@ message DeleteGroupResponse {
 // Roles are assigned to users in the context of a group, giving them
 // certain permissions (as defined by that role) within the group.
 // A User can assign a role to another User only if it has a role with
-// equal or higher privileges. The follow assignments are possible -
+// equal or higher privileges. The following assignments are possible -
 // Caller Role    |   Assignable Roles
 //  ADMIN         |    ADMIN, ASSIGNER, REQUESTOR
 //  ASSIGNER      |    ASSIGNER, REQUESTOR
@@ -153,7 +155,7 @@ message RemoveUserRoleResponse {
 message GetUserRoleRequest {
   // username or service account name
   string username = 1;
-  // user role type
+  // user type
   AccountType user_type = 2;
   // org_id = "org-" + org name
   string org_id = 3;
@@ -164,6 +166,7 @@ message GetUserRoleResponse {
   map<string, UserRole> groups = 1;
 }
 
+// Domain certs contain PDCs assigned to groups.
 message CreateDomainCertRequest {
   string group_id = 1;
   bytes certificate_der = 2;
@@ -244,24 +247,26 @@ message GetOwnershipVoucherResponse {
 service OwnershipVoucherService {
   // CreateGroup creates a group as a child of an existing group.
   // Errors will be returned:
-  // INVALID_ARGUMENT if the description is empty
+  // INVALID_ARGUMENT if either parent or description is empty
   // NOT_FOUND if the parent group doesn't exist, as specified in request
+  // ALREADY_EXISTS if a group already exists with the same parent group
+  // and description.
   // PERMISSION_DENIED if the user doesn't have access to the parent group
   // Roles with permission to invoke this = ADMIN
   rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse);
-  // DeleteGroup deletes a named group. Any associated certs and serials
-  // must be deleted before the group can be deleted. Any children must be
-  // deleted before the group can be deleted i.e. a subtree has to be
-  // deleted in a bottom up manner
+  // DeleteGroup deletes a named group. All associated cert_ids and child
+  // groups must have been deleted and all associated components must have
+  // been removed before the group can be deleted.
   // Errors will be returned:
   // INVALID_ARGUMENT if group_id = root group (the precreated root group
-  // cannot be deleted)
+  // cannot be deleted) or if cert_ids, users, or child_group_ids is
+  // non-empty.
   // NOT_FOUND if the group doesn't exist
   // PERMISSION_DENIED if user doesn't have access to parent group
   // Roles with permission to invoke this = ADMIN
   rpc DeleteGroup(DeleteGroupRequest) returns (DeleteGroupResponse);
-  // GetGroup returns the domain-certs (keyed by id), serials,
-  // and user/role mappings for that group and the children group ids.
+  // GetGroup returns the domain-certs (keyed by id), components,
+  // user/role mappings for that group, and the child_group_ids.
   // Errors will be returned:
   // NOT_FOUND if the group doesn't exist
   // PERMISSION_DENIED if the user doesn't have access to the group
@@ -269,87 +274,92 @@ service OwnershipVoucherService {
   rpc GetGroup(GetGroupRequest) returns (GetGroupResponse);
 
   // AddUserRole will assign a role to a user in a named group.
-  // Username is unique to an Org ID and Username.
+  // Username is unique to an username, org_id, user_type tuple.
   // Errors will be returned:
-  // INVALID_ARGUMENT if the username is empty
+  // INVALID_ARGUMENT if any field is empty
   // NOT_FOUND if the group doesn't exist, as specified in the request
-  // FAILED_PRECONDITION if any of the paramters doesn't exist.
+  // FAILED_PRECONDITION if any of user tuple (username, org_id, user_type)
+  // or group_id do not exist.
   // ALREADY_EXISTS if user already exists in the group
   // PERMISSION_DENIED if the user doesn't have access to the group.
   // Roles with permission to invoke this = ADMIN
   rpc AddUserRole(AddUserRoleRequest) returns (AddUserRoleResponse);
   // RemoveUserRole removes a role from a user in a named group.
-  // Username is unique to an Org ID and Username.
+  // Username is unique to an username, org_id, user_type tuple.
   // Errors will be returned:
-  // INVALID_ARGUMENT if the username is empty
-  // NOT_FOUND if the group doesn't exist or if the user and role
-  // doesn't exist in the group.
+  // INVALID_ARGUMENT if any field is empty
+  // NOT_FOUND if the group doesn't exist or if the user tuple is not a
+  // member of the group.
   // PERMISSION_DENIED if user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN
   rpc RemoveUserRole(RemoveUserRoleRequest) returns (RemoveUserRoleResponse);
   // GetUserRole returns the roles the user is assigned in the group.
-  // Username is unique to an Org ID and Username.
+  // Username is unique to an username, org_id, user_type tuple.
   // A user can only view roles of another user in the groups that
   // it has a role assigned to.
   // Errors will be returned:
-  // INVALID_ARGUMENT if the username is empty
-  // NOT_FOUND if the group or the user doesn't exist.
+  // INVALID_ARGUMENT if any field is empty
+  // NOT_FOUND if the group doesn't exist or the user tuple is not a member.
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
   rpc GetUserRole(GetUserRoleRequest) returns (GetUserRoleResponse);
 
 
-  // AddSerial assigns the serial to the group.
+  // AddSerial assigns the component to the group.
   // Errors will be returned:
-  // INVALID_ARGUMENT if the serial number is empty or the IEN supplied
-  // isn't applicable f the voucher issuer
-  // NOT_FOUND if the serial number or group id doesn't exist
-  // ALREADY_EXISTS if serial_number already exists in the group
+  // INVALID_ARGUMENT if any field of component or group_id is empty or the
+  // IEN isn't applicable for the voucher issuer.
+  // NOT_FOUND if the component or group_id doesn't exist
+  // ALREADY_EXISTS if component is already a member of the group.
   // PERMISSION_DENIED if the user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER
   rpc AddSerial(AddSerialRequest) returns (AddSerialResponse);
-  // RemoveSerial removes the serial from the group.
+  // RemoveSerial removes the component from the group.
   // Errors will be returned:
-  // INVALID_ARGUMENT if the serial number is empty or the IEN supplied
-  // isn't applicable for the voucher issuer
-  // NOT_FOUND if the serial number or group id doesn't exist
+  // INVALID_ARGUMENT if any field of component or group_id is empty or the
+  // IEN isn't applicable for the voucher issuer.
+  // NOT_FOUND if the component or group_id doesn't exist
   // PERMISSION_DENIED if user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER
   rpc RemoveSerial(RemoveSerialRequest) returns (RemoveSerialResponse);
-  // GetSerial returns serial number, groups the serial belongs to.
+  // GetSerial returns component, groups the component belongs to.
   // Errors will be returned:
-  // INVALID_ARGUMENT if the serial number is empty or the IEN supplied
-  // isn't applicable for the voucher issuer
-  // NOT_FOUND if the serial number doesn't exist.
+  // INVALID_ARGUMENT if any field of component or group_id is empty or the
+  // IEN isn't applicable for the voucher issuer.
+  // NOT_FOUND if the component doesn't exist.
   // PERMISSION_DENIED if the user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
   rpc GetSerial(GetSerialRequest) returns (GetSerialResponse);
 
   // CreateDomainCert creates the certificate in the group.
   // Errors will be returned:
-  // NOT_FOUND if the group doesn't exist, as specified in the request
-  // INVALID_ARGUMENT if expiry_time is empty or in the past or the
-  // suuplied cert is invalid
-  // ALREADY_EXISTS if cert already exists in the group
+  // INVALID_ARGUMENT if expiry_time is empty or in the past, the
+  // supplied cert is invalid (such expired or malformed), or any of the
+  // fields are empty.
+  // NOT_FOUND if the group_id doesn't exist.
+  // ALREADY_EXISTS if the certificate_der,revocation_checks,expiry_time
+  // tuple already exists in the group.
   // PERMISSION_DENIED if the user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER
   rpc CreateDomainCert(CreateDomainCertRequest) returns (CreateDomainCertResponse);
-  // DeleteDomainCert deletes the cert from the database.
+  // DeleteDomainCert deletes the cert_id.
   // Errors will be returned:
-  // NOT_FOUND if the cert doesn't exist
+  // NOT_FOUND if the cert_id doesn't exist
   // PERMISSION_DENIED if user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER
   rpc DeleteDomainCert(DeleteDomainCertRequest) returns (DeleteDomainCertResponse);
-  // GetDomainCert reveals the details of the certificate.
-  // NOT_FOUND if the cert doesn't exist
+  // GetDomainCert returns the details of the cert_id.
+  // NOT_FOUND if the cert_id doesn't exist.
   // PERMISSION_DENIED if user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
   rpc GetDomainCert(GetDomainCertRequest) returns (GetDomainCertResponse);
 
-  // GetOwnershipVoucher issues ownership voucher and returns TPM public 
-  // key for the serial number (if it exists/if applicable)
+  // GetOwnershipVoucher issues an ownership voucher for the component (if it
+  // exists/if applicable)
   // Errors will be returned:
-  // INVALID_ARGUMENT if serial number, IEN or lifetime is empty, lifetime is in the past
-  // or the IEN supplied isn't applicable for the voucher issuer
+  // INVALID_ARGUMENT if any field of the request is empty, lifetime is in
+  // the past, or the IEN supplied isn't applicable for the voucher issuer
+  // FAILED_PRECONDITION if the component or cert_id do not exist.
+  // PERMISSION_DENIED if user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
   rpc GetOwnershipVoucher(GetOwnershipVoucherRequest) returns (GetOwnershipVoucherResponse);
 }
