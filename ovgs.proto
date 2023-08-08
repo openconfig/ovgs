@@ -11,6 +11,7 @@
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 // License for the specific language governing permissions and limitations under
 // the License.
+syntax = "proto3";
 
 package ovgs.v1;
 
@@ -227,7 +228,7 @@ message GetSerialRequest {
 }
 
 message GetSerialResponse {
-  // SKU public key (if it exists/if applicable)
+  // TPM's (if applicable) endorsement key in ASN.1 DER encoded format
   bytes public_key_der = 1;
   // List of groups the serial number belongs to.
   repeated string group_ids = 2;
@@ -247,9 +248,9 @@ message GetOwnershipVoucherRequest {
 }
 
 message GetOwnershipVoucherResponse {
-  // binary CMS format (rfc5652)
+  // Voucher in binary CMS format (rfc5652)
   bytes voucher_cms = 1;
-  // ASN.1 DER encoded
+  // TPM's (if applicable) endorsement key in ASN.1 DER encoded format
   bytes public_key_der = 2;
 }
 
