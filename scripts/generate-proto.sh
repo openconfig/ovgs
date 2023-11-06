@@ -22,5 +22,5 @@ fi
 
 
 cd ${SRC_DIR}
-protoc -I${SRC_DIR}  --go_out=.  --go_opt=paths=source_relative  ${SRC_DIR}/ovgs.proto
+protoc -I${SRC_DIR}  --go-grpc_out=. --go-grpc_opt=paths=source_relative --go_out=. --go_opt=paths=source_relative ${SRC_DIR}/ovgs.proto
 
