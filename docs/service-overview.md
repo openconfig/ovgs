@@ -77,11 +77,11 @@ Ownership vouchers can be issued for components as identified by their
 serial number + ien (hereafter simply referred to as serial number, the
 inclusion of an ien as appropriate, is implied). Some products may also have a
 TPM Public Key associated with them. By default, it is assumed that all the
-customer-owned component serial numbers are added to the root group. Users with
-the **ASSIGNER** or **ADMIN** role can move/add serials within the tree from
-there. A serial can be assigned to a single group apart from the root group. See
-the `/GetSerial` RPC for an example of the details available for a given serial
-number.
+customer-owned component serial numbers are added to the root group by the
+vendor as they are allocated. Users with the **ASSIGNER** or **ADMIN** role can
+move/add serials within the tree from there. A serial can be assigned to a
+single group apart from the root group. See the `/GetSerial` RPC for an example
+of the details available for a given serial number.
 
 ## Pinned Domain Certificates (PDCs)
 

@@ -40,7 +40,12 @@ option go_package = "github.com/aristanetworks/ownership-voucher-grpc/ovgs";
 // an initial User is given ADMIN role over this root group as part of the setup,
 // which can then be used to bootstrap the rest of the org tree - add more users,
 // create child groups, assign serials to them, add certs and finally, issue
-// vouchers for a serial number.
+// vouchers for a serial number.  The Root group is populated by the implementor
+// with serial numbers as they are assigned by purchasing, RMA (Return Materials
+// Authorization), EFT (Early Field Trial), or asset transfers.  The implementor
+// removes serial numbers from the tree after an RMA or EFT return, asset
+// transfer, or at request of the group owner (eg: asset destruction).
+//
 
 enum UserRole {
   USER_ROLE_UNSPECIFIED = 0;
