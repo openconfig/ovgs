@@ -30,19 +30,19 @@ option go_package = "github.com/aristanetworks/ownership-voucher-grpc/ovgs";
 
 // Users are uniquely identified by the tuple username, user_type, org_id.
 
-// Note that the creation of a User is external to the ovgs service. Users may be
-// created by any mechanism that the service implementor may offer. It is assumed
-// that all such Users are known to ovgs, which only deals with the assignment of
-// roles to them.
+// Note that the creation of a User is external to the ovgs service. Users may
+// be created by any mechanism that the vendor (the OVGS provider) may offer. It
+// is assumed that all such Users are known to ovgs, which only deals with the
+// assignment of roles to them.
 // Root group - Each customer/org is assigned a name. The org_id can be constructed
 // as "org-" + org name.  A root group with org_id as the group_id is pre-created
 // and all serial numbers owned by the org are added to this root group. Moreover,
 // an initial User is given ADMIN role over this root group as part of the setup,
 // which can then be used to bootstrap the rest of the org tree - add more users,
 // create child groups, assign serials to them, add certs and finally, issue
-// vouchers for a serial number.  The Root group is populated by the implementor
+// vouchers for a serial number.  The Root group is populated by the vendor
 // with serial numbers as they are assigned by purchasing, RMA (Return Materials
-// Authorization), EFT (Early Field Trial), or asset transfers.  The implementor
+// Authorization), EFT (Early Field Trial), or asset transfers.  The vendor
 // removes serial numbers from the tree after an RMA or EFT return, asset
 // transfer, or at request of the group owner (eg: asset destruction).
 //
