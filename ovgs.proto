@@ -21,12 +21,14 @@ option go_package = "github.com/aristanetworks/ownership-voucher-grpc/ovgs";
 
 // The OVGS service defines a heirarchy of 'groups', which are identified by a
 // group_id (allocated by the server). Each group can have several child groups;
-// Pinned Domain Certs are associated to a group, serial numbers can be assigned to a
-// group (which serves to limit the set of Users who can issue vouchers for those
-// serial numbers to Users who have the necessary permissions in that group)
-// Groups are created by users (except the root group, more on this later) and roles
-// are assigned to users (limiting the set of operations a user can invoke) per group.
-// Any permissions accorded by these roles on a group are heirarchical in nature.
+// Pinned Domain Certs are associated to a group and are not inherited by child-
+// groups though the same PDC can exist in multiple groups, serial numbers can
+// be assigned to a group (which serves to limit the set of Users who can issue
+// vouchers for those serial numbers to Users who have the necessary permissions in
+// that group).  Groups are created by users (except the root group, more on this
+// later) and roles are assigned to users (limiting the set of operations a user
+// can invoke) per group. Any permissions accorded by these roles on a group are
+// heirarchical in nature.
 
 // Users are uniquely identified by the tuple username, user_type, org_id.
 
@@ -111,7 +113,8 @@ message GetGroupRequest {
 message GetGroupResponse {
   // Group id
   string group_id = 1;
-  // list of certificate ids associated with the group.
+  // list of certificate IDs associated with the group.  Each ID is specific
+  // to the given certificate and this group.
   repeated string cert_ids = 2;
   // list of components in the group.
   repeated Component components = 3;
