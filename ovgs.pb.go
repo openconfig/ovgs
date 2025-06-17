@@ -39,7 +39,8 @@ type UserRole int32
 
 const (
 	UserRole_USER_ROLE_UNSPECIFIED UserRole = 0
-	// Internal to the service
+	// Internal to the service, used by the vendor to invoke support related operations
+	// Read write to everything
 	UserRole_USER_ROLE_SUPPORT UserRole = 1
 	// Read write to everything
 	UserRole_USER_ROLE_ADMIN UserRole = 2
@@ -227,13 +228,13 @@ func (x *User) GetUserRole() UserRole {
 	return UserRole_USER_ROLE_UNSPECIFIED
 }
 
-// A component uniquely identifies a part for which a voucher can be issued
+// A component uniquely identifies a part which can be queried by this service
 type Component struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// ien is the vendor's IANA Enterprise Number. 30065 is Arista Networks's ien.
+	// ien is the vendor's IANA Enterprise Number.
 	Ien          string `protobuf:"bytes,1,opt,name=ien,proto3" json:"ien,omitempty"`
 	SerialNumber string `protobuf:"bytes,2,opt,name=serial_number,json=serialNumber,proto3" json:"serial_number,omitempty"`
 }
