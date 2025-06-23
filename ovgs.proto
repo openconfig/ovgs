@@ -376,7 +376,8 @@ service OwnershipVoucherService {
   // exists/if applicable)
   // Errors will be returned:
   // INVALID_ARGUMENT if any field of the request is empty, lifetime is in
-  // the past, or the IEN supplied isn't applicable for the voucher issuer
+  // the past or exceeds the cert_id expiry_time, or the IEN supplied isn't
+  // applicable for the voucher issuer.
   // FAILED_PRECONDITION if the component or cert_id do not exist.
   // PERMISSION_DENIED if user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
