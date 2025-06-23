@@ -51,7 +51,8 @@ option go_package = "github.com/aristanetworks/ownership-voucher-grpc/ovgs";
 
 enum UserRole {
   USER_ROLE_UNSPECIFIED = 0;
-  // Internal to the service
+  // Internal to the service, used by the vendor to invoke support related operations
+  // Read write to everything
   USER_ROLE_SUPPORT = 1;
   // Read write to everything
   USER_ROLE_ADMIN = 2;
@@ -87,9 +88,9 @@ message User {
   UserRole user_role = 4;  
 }
 
-// A component uniquely identifies a part for which a voucher can be issued
+// A component uniquely identifies a part which can be queried by this service
 message Component {
-   // ien is the vendor's IANA Enterprise Number. 30065 is Arista Networks's ien.
+    // ien is the vendor's IANA Enterprise Number.
     string ien = 1;
     string serial_number = 2;
 }
