@@ -708,7 +708,7 @@ $ grpcurl -H "Cookie: access_token=${ACCESS_TOKEN}"             \
   -proto ovgs.proto                                             \
   -d '{"cert_id": "cert-29466354-a669-4c47-91cf-f214c03626db"}' \
   www.a-network-vendor.io:443                                   \
-  ovgs.v1.OwnershipVoucherService/CreateDomainCert
+  ovgs.v1.OwnershipVoucherService/GetDomainCert
 ```
 
 #### Response
