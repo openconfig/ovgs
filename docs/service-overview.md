@@ -715,6 +715,7 @@ $ grpcurl -H "Cookie: access_token=${ACCESS_TOKEN}"             \
 
 ```text
 {
+  "cert_id": "cert-29466354-a669-4c47-91cf-f214c03626db",
   "group_id": "group-3e7e2431-6c73-423b-91ef-b734a13daaab",
   "certificate_der": "MIIHRzCCBi+gAwIB...I6dj87VD+laMUBd7HBtOEGsiDoRSlA==",
   "revocation_checks": true,
@@ -820,8 +821,12 @@ $ grpcurl -H "Cookie: access_token=${ACCESS_TOKEN}"                 \
 
 ```text
 {
+  "group_id": "group-3e7e2431-6c73-423b-91ef-b734a13daaab",,
   "cert_ids": [ "cert-29466354-a669-4c47-91cf-f214c03626db" ],
-  "serial_numbers": [ "ABC101" ],
+  "components": [{
+          "ien": "30065",
+          "serialNumber": "ABC101"
+    }],
   "users": [{
           "username": "srv-admin-on-default",
           "user_type": "ACCOUNT_TYPE_SERVICE_ACCOUNT",
