@@ -2,7 +2,7 @@ module github.com/openconfig/ovgs
 
 go 1.24.0
 
-toolchain go1.25.4
+toolchain go1.25.5
 
 require (
 	github.com/golang/protobuf v1.5.4
