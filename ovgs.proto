@@ -79,13 +79,13 @@ enum AccountType {
 // these existing user/service accounts.
 message User {
   // Username or Service Account name.
-  string username = 1;     
+  string username = 1;
   // User account type
-  AccountType user_type = 2;  
+  AccountType user_type = 2;
   // org_id = "org-" + org name. A calling User will know their org_id.
-  string org_id = 3;       
+  string org_id = 3;
   // Role of the user, one of ADMIN, ASSIGNER or REQUESTOR.
-  UserRole user_role = 4;  
+  UserRole user_role = 4;
 }
 
 // A component uniquely identifies a part which can be queried by this service
@@ -100,7 +100,7 @@ message CreateGroupRequest {
   // Parent group ID, it could be org ID or a group ID.
   string parent = 1;
   // Description of the group.
-  string description = 2;  
+  string description = 2;
 }
 
 message CreateGroupResponse {
@@ -144,15 +144,15 @@ message DeleteGroupResponse {
 //  REQUESTOR     |    NA (cannot assign roles)
 message AddUserRoleRequest {
   // username or service account name
-  string username = 1;     
+  string username = 1;
   // user account type
   AccountType user_type = 2;
   // org_id = "org-" + org name
-  string org_id = 3;       
+  string org_id = 3;
   // Group id to assign to the user.  Must be set.
   string group_id = 4;
   // role of the user, one of ADMIN, ASSIGNER or REQUESTOR.
-  UserRole user_role = 5;  
+  UserRole user_role = 5;
 }
 
 message AddUserRoleResponse {
@@ -336,7 +336,8 @@ service OwnershipVoucherService {
   // Errors will be returned:
   // INVALID_ARGUMENT if any field of component or group_id is empty or the
   // IEN isn't applicable for the voucher issuer.
-  // NOT_FOUND if the component or group_id doesn't exist
+  // NOT_FOUND if the component or group_id doesn't exist, or the component
+  // is not assigned to the group_id
   // PERMISSION_DENIED if user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER
   rpc RemoveSerial(RemoveSerialRequest) returns (RemoveSerialResponse);
