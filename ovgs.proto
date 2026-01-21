@@ -95,6 +95,24 @@ message Component {
     string serial_number = 2;
 }
 
+// TpmInfo conveys the details about the Trusted Platform Module (TPM) on the component
+message TpmInfo {
+  oneof ek_data {
+    // The ASN.1 DER encoded public component of the TPM's Endorsement Key (if applicable).
+    // This is mainly for TPM 1.2 devices.
+    bytes endorsement_key = 1;
+
+    // The DER encoded X.509 certificate vouching for the authenticity of the endorsement
+    // key (if applicable).
+    // This is mainly for TPM 2.0 devices with IDevID support.
+    bytes ek_certificate = 2;
+  }
+
+  // The ASN.1 DER encoded public component of the Platform Primary Key (if applicable)
+  // This is mainly for TPM 2.0 devices with no IDevID support.
+  bytes platform_primary_key = 3;
+}
+
 // The group heirarchy is rooted at the root group (group_id = org_id)
 message CreateGroupRequest {
   // Parent group ID, it could be org ID or a group ID.
@@ -237,14 +255,17 @@ message GetSerialRequest {
 }
 
 message GetSerialResponse {
+  // Deprecated: Use tpm_info instead.
   // TPM's (if applicable) endorsement key in ASN.1 DER encoded format
-  bytes public_key_der = 1;
+  bytes public_key_der = 1 [deprecated = true];
   // List of groups the serial number belongs to.
   repeated string group_ids = 2;
   // SKU mac address
   string mac_addr = 3;
   // SKU/Hardware model name
   string model = 4;
+  // TPM related info
+  TpmInfo tpm_info = 5;
 }
 
 message GetOwnershipVoucherRequest {
@@ -259,8 +280,11 @@ message GetOwnershipVoucherRequest {
 message GetOwnershipVoucherResponse {
   // Voucher in binary CMS format (rfc5652)
   bytes voucher_cms = 1;
+  // Deprecated: Use tpm_info instead.
   // TPM's (if applicable) endorsement key in ASN.1 DER encoded format
-  bytes public_key_der = 2;
+  bytes public_key_der = 2 [deprecated = true];
+  // TPM related info
+  TpmInfo tpm_info = 3;
 }
 
 service OwnershipVoucherService {

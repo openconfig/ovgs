@@ -426,7 +426,13 @@ public_key_der = <TPM public key, ASN.1 der encoded (if applicable for this part
 group_ids = [group-e51b5c2c-eda1-4c27-8a86-ece7faa0dac2]
 mac_addr = 00:00:5e:00:53:af
 model = DCS-7800-SUP
+tpm_info = {
+  endorsement_key = <Public component of TPM's endorsement key, ASN.1 der encoded (if applicable for this part)>
+  platform_primary_key = <Public component of platform primary key, ASN.1 der encoded (if applicable for this part)>
+}
 ```
+
+**Note**: `public_key_der` is deprecated and will be removed in favor of `tpm_info`
 
 ### /GetOwnershipVoucher
 
@@ -458,7 +464,13 @@ lifetime = 2023-02-25T00:00:00.000Z
 ```text
 voucher_cms = <voucher, example below>
 public_key_der = <switch TPM public key, ASN.1 der encoded, example below>
+tpm_info = {
+  ek_certificate = <DER encoded X.509 certificate of the endorsement key (if applicable for this part)>
+  platform_primary_key = <Public component of platform primary key, ASN.1 der encoded (if applicable for this part)>
+}
 ```
+
+**Note**: `public_key_der` is deprecated and will be removed in favor of `tpm_info`
 
 ## Service Use Examples
 
@@ -799,6 +811,10 @@ $ grpcurl -H "Cookie: access_token=${ACCESS_TOKEN}" 		   \
 ```text
 {
   "public_key_der": "MIIBIjANBgkqhkiG9w0BA...A4M3QIDAQAB",
+  "tpm_info": {
+    "endorsement_key": "MIIBIjANBgkqhkiG9w0BA...A4M3QIDAQAB",
+    "platform_primary_key": "3039301306...bc1144e2",
+  },
   "group_ids": [ "group-3e7e2431-6c73-423b-91ef-b734a13daaab", "org-acmeco" ],
   "mac_addr": "00:00:5e:00:53:af",
   "model": "DCS-7800-SUP"
@@ -856,8 +872,14 @@ $ grpcurl -H "Cookie: access_token=${ACCESS_TOKEN}"               \
 #### Response
 
 ```text
-{ "voucher_cms": "MIIeYAYJKoZI...XyC/dx8DbRGBWKK/pcGG+U50PRt86Q==",
-    "public_key_der": "MIIBIjANBg...BVdgA4M3QIDAQAB" }
+{
+  "voucher_cms": "MIIeYAYJKoZI...XyC/dx8DbRGBWKK/pcGG+U50PRt86Q==",
+  "public_key_der": "MIIBIjANBg...BVdgA4M3QIDAQAB",
+  "tpm_info": {
+    "ek_certificate": "308202413082...cacbcccdcecf",
+    "platform_primary_key": "3039301306...bc1144e2",
+  }
+}
 ```
 
 Note that every time a voucher is requested for a device with the same PDC and
