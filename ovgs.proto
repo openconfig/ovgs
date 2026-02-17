@@ -350,11 +350,14 @@ service OwnershipVoucherService {
   // it will be unassigned from that group and reassigned to the new group in the request.
   // NOTE: A component is always assigned to the root group at all times.
   // Errors will be returned:
-  //   INVALID_ARGUMENT if any field of component or group_id is empty or the IEN
+  //   INVALID_ARGUMENT if any field of component or group_id is empty or the IEN.
   //   isn't applicable for the voucher issuer.
-  //   NOT_FOUND if the component or group_id doesn't exist
+  //   NOT_FOUND if the component or group_id doesn't exist.
   //   ALREADY_EXISTS if component is already a member of the group in the request.
-  //   PERMISSION_DENIED if the user doesn't have access to the group
+  //   PERMISSION_DENIED If the user doesn't have permission for the source and
+  //                     destination groups.  If the source is not a non-root
+  //                     group (ie: only exists in the root group), the user
+  //                     must also have permission to the root group.
   // Roles with permission to invoke this = ADMIN, ASSIGNER
   rpc AddSerial(AddSerialRequest) returns (AddSerialResponse);
   // RemoveSerial removes the component from the group.
