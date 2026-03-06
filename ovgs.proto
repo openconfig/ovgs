@@ -122,6 +122,17 @@ message GroupList {
   repeated string group_ids = 1;
 }
 
+message GetComponentsRequest {
+  string group_id = 1;
+}
+
+message GetComponentsResponse {
+  // Component
+  Component component = 1;
+  // GetSerial data for the Component.
+  GetSerialResponse serial = 2;
+}
+
 // The group hierarchy is rooted at the root group (group_id = org_id)
 message CreateGroupRequest {
   // Parent group ID, it could be org ID or a group ID.
@@ -302,6 +313,16 @@ message GetSerialResponse {
   TpmInfo tpm_info = 5;
 }
 
+message GetSerialsRequest {
+  repeated Component components = 1;
+}
+
+message GetSerialsResponse {
+  // The order of serials must reflect the order of the components in the
+  // GetSerialsRequest.
+  repeated GetSerialResponse serials = 1;
+}
+
 message GetOwnershipVoucherRequest {
   // Serial number for the part to fetch OV.
   Component component = 1;
@@ -324,7 +345,29 @@ message GetOwnershipVoucherResponse {
 // OwnershipVoucherService provides APIs for managing ownership vouchers,
 // groups, users, certificates, and device serial numbers in a hierarchical
 // multi-tenant environment with cross-org delegation support.
+message GetOwnershipVouchersRequest {
+  // Serial number for the part to fetch OV.
+  repeated Component component = 1;
+  // Certificate ID to use for OV.
+  string cert_id = 2;
+  // Lifetime of the OV.
+  google.protobuf.Timestamp lifetime = 3;
+}
+
+message GetOwnershipVouchersResponse {
+  // Ownership vouchers.
+  repeated GetOwnershipVoucherResponse ownership_vouchers = 1;
+}
+
 service OwnershipVoucherService {
+  // GetComponents returns all of the components for the given group in a stream with
+  // their GetSerial data.
+  // Errors will be returned:
+  //   NOT_FOUND if the group doesn't exist
+  //   PERMISSION_DENIED if the user doesn't have access to the group
+  // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
+  rpc GetComponents(GetComponentsRequest) returns (stream GetComponentsResponse);
+
   // CreateGroup creates a group as a child of an existing group.
   // A group inherits delegated_orgs from its parent.
   // Errors will be returned:
@@ -451,6 +494,8 @@ service OwnershipVoucherService {
   //   PERMISSION_DENIED if the caller doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
   rpc GetSerial(GetSerialRequest) returns (GetSerialResponse);
+  // GetSerials returns multiple serials, but is otherwise the same as GetSerial.
+  rpc GetSerials(GetSerialsRequest) returns (GetSerialsResponse);
 
   // CreateDomainCert creates the certificate in the group.
   // Errors will be returned:
@@ -487,4 +532,7 @@ service OwnershipVoucherService {
   //   PERMISSION_DENIED if the caller doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
   rpc GetOwnershipVoucher(GetOwnershipVoucherRequest) returns (GetOwnershipVoucherResponse);
+  // GetOwnershipVouchers issues ownership vouchers for multiple components.  It
+  // is otherwise the same as GetOwnershipVoucher.
+  rpc GetOwnershipVouchers(GetOwnershipVouchersRequest) returns (GetOwnershipVouchersResponse);
 }
