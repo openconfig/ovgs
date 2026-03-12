@@ -360,9 +360,8 @@ message GetOwnershipVouchersResponse {
 }
 
 service OwnershipVoucherService {
-  // GetComponents returns all of the components for the given group in a stream with
-  // their GetSerial data.
-  // Errors will be returned:
+  // GetComponents returns all of the components for the given group_id.
+  // Errors may be returned, those errors are:
   //   NOT_FOUND if the group doesn't exist
   //   PERMISSION_DENIED if the user doesn't have access to the group
   // Roles with permission to invoke this = ADMIN, ASSIGNER, REQUESTOR
