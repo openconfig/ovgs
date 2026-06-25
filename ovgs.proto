@@ -307,7 +307,9 @@ message GetSerialResponse {
   repeated string group_ids = 2;
   // SKU mac address
   string mac_addr = 3;
-  // SKU/Hardware model name
+  // SKU/Hardware model name.  This is expected to be consistent with
+  // other device telemetry, such as ENTITY-MIB.entPhysicalModelName.
+  // It is not intended to match sales SKUs.
   string model = 4;
   // TPM related info
   TpmInfo tpm_info = 5;
