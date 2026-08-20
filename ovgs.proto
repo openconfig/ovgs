@@ -305,7 +305,8 @@ message GetSerialResponse {
   bytes public_key_der = 1 [deprecated = true];
   // List of groups the serial number belongs to.
   repeated string group_ids = 2;
-  // SKU mac address
+  // SKU mac address in one of the common formats; 00:00:5e:00:53:01,
+  // 00-00-5e-00-53-01, or 0000.5e00.5301.
   string mac_addr = 3;
   // SKU/Hardware model name
   string model = 4;
