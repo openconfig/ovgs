@@ -25,10 +25,10 @@ option go_package = "github.com/aristanetworks/ownership-voucher-grpc/ovgs";
 // groups though the same PDC can exist in multiple groups, serial numbers can
 // be assigned to a group (which serves to limit the set of Users who can issue
 // vouchers for those serial numbers to Users who have the necessary permissions in
-// that group). Groups are created by users (except the root group, more on this
-// later) and roles are assigned to users (limiting the set of operations a user
-// can invoke) per group. Any permissions accorded by these roles on a group are
-// hierarchical in nature.
+// that group), but always remain members of the root group. Groups are created by
+// users (except the root group, more on this later) and roles are assigned to
+// users (limiting the set of operations a user can invoke) per group. Any
+// permissions accorded by these roles on a group are hierarchical in nature.
 
 // Users are uniquely identified by the tuple username, user_type, org_id.
 
