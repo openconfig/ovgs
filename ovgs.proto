@@ -308,7 +308,9 @@ message GetSerialResponse {
   // SKU mac address in one of the common formats; 00:00:5e:00:53:01,
   // 00-00-5e-00-53-01, or 0000.5e00.5301.
   string mac_addr = 3;
-  // SKU/Hardware model name
+  // SKU/Hardware model name.  This is expected to be consistent with
+  // other device telemetry, such as ENTITY-MIB.entPhysicalModelName.
+  // It is not intended to match sales SKUs.
   string model = 4;
   // TPM related info
   TpmInfo tpm_info = 5;
