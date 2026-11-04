@@ -158,7 +158,8 @@ TPM Public Key associated with them. By default, it is assumed that all the
 customer-owned component serial numbers are added to the root group by the
 vendor as they are allocated. Users with the **ASSIGNER** or **ADMIN** role can
 move/add serials within the tree from there. A serial can be assigned to a
-single group apart from the root group. See the [`/GetSerial`](#getserial) RPC for an example
+single group apart from the root group, but always remains a member of the
+root group. See the [`/GetSerial`](#getserial) RPC for an example
 of the details available for a given serial number.
 
 ## Pinned Domain Certificates (PDCs)
